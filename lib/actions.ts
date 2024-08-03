@@ -5,34 +5,24 @@ export const getSession = async () => {
   const refreshToken = cookies().get('refresh_token')?.value;
 
 //   if (!accessToken || !refreshToken) return null;
+// console.log(accessToken);
+
   try {
-    let res = await fetch('http://localhost:3000/api/users/current', {
+    let res = await fetch('http://localhost:3001/api/session', {
       method: 'GET',
       credentials: 'include',
-    //   headers: {
-    //     Cookie: `access_token=${accessToken};refresh_token=${refreshToken}`,
-    //   },
+      headers: {
+        Cookie: `access_token=${accessToken};refresh_token=${refreshToken}`,
+        'Content-type': 'application/json',
+      },
       cache: 'no-cache',
     });
+    console.log(res.status);
     let data = await res.json();
-    console.log(data);
-
-    if (!data?.user) {
-      res = await fetch('http://localhost:3000/api/auth/refresh', {
-        method: 'GET',
-        credentials: 'include',
-        // headers: {
-        //   Cookie: `refresh_token=${refreshToken}`,
-        // },
-        cache: 'no-cache',
-      });
-
-      data = await res.json();
-    }
 
     return data;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return null;
   }
 };
