@@ -17,7 +17,6 @@ export const getSession = async () => {
       },
       cache: 'no-cache',
     });
-    console.log(res.status);
     let data = await res.json();
 
     return data;
@@ -26,3 +25,23 @@ export const getSession = async () => {
     return null;
   }
 };
+
+export const getCookie = async () => {
+  try {
+    let res = await fetch('http://localhost:3001/api/cookie', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      cache: 'no-store'
+    });
+
+    console.log(cookies().get('test'));
+    
+    let data = await res.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
