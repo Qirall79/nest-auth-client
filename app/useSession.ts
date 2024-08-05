@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export const useSession = () => {
   const [data, setData] = useState(null);
@@ -8,17 +8,20 @@ export const useSession = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      let res = await axios.get('http://localhost:3000/api/users/current', {
+      let res = await axios.get("http://localhost:3000/api/users/current", {
         withCredentials: true,
       });
 
       setData(res.data);
     } catch (error) {
       try {
-        const res = await axios.get('http://localhost:3000/api/auth/refresh', {
+        let res = await axios.get("http://localhost:3000/api/auth/refresh", {
           withCredentials: true,
         });
 
+        await axios.get("http://localhost:3000/api/users/current", {
+          withCredentials: true,
+        });
         return setData(res.data);
       } catch (error) {
         console.log(error);

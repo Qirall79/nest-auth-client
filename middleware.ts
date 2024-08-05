@@ -1,13 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "./lib/actions";
+import { getSession, refresh } from "./lib/actions";
+import { jwtDecode } from "jwt-decode";
+import { cookies } from "next/headers";
 
 export async function middleware(request: NextRequest) {
-  const session = await getSession();
+  const accessToken = cookies().get("access_token")?.value;
+  const refreshToken = cookies().get("refresh_token")?.value;
+
+  if (!accessToken && !refreshToken)
+    return NextResponse.redirect("http://localhost:3001/auth/login");
+
+  const decodedToken = accessToken ? jwtDecode(accessToken) : null;
+  const timeRemaining = (decodedToken?.exp || 0) - Date.now() / 1000;
 
   const response = NextResponse.next();
-  if (session.accessToken) {
-    response.cookies.set("access_token", session.accessToken);
-    response.cookies.set("refresh_token", session.refreshToken);
+  if (timeRemaining <= 0) {
+    const session = await refresh();
+
+    if (session?.accessToken) {
+      response.cookies.set("access_token", session?.accessToken);
+      response.cookies.set("refresh_token", session?.refreshToken);
+    }
   }
 
   return response;
@@ -21,7 +34,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - auth routes
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|auth/*).*)",
   ],
 };
